@@ -148,7 +148,7 @@ export const getDatabasesPermissionEditor = createSelector(
       { name: getEditorEntityName(params, hasSingleSchema) },
       { name: t`Data access` },
       { name: t`Native query editing` },
-      ...PLUGIN_FEATURE_LEVEL_PERMISSIONS.dataColumns,
+      ...PLUGIN_FEATURE_LEVEL_PERMISSIONS.getDataColumns('schemas'),
     ];
 
     let entities: any = [];
@@ -263,7 +263,7 @@ export const getGroupsDataPermissionEditor = createSelector(
       { name: t`Group name` },
       { name: t`Data access` },
       { name: t`Native query editing` },
-      ...PLUGIN_FEATURE_LEVEL_PERMISSIONS.dataColumns,
+      ...PLUGIN_FEATURE_LEVEL_PERMISSIONS.getDataColumns('schemas'),
     ];
 
     const entities = groups.map(group => {

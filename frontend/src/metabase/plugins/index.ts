@@ -125,5 +125,5 @@ export const PLUGIN_FEATURE_LEVEL_PERMISSIONS = {
   ) => {
     return [] as any;
   },
-  dataColumns: [] as any,
+  getDataColumns: (subject: PermissionSubject) => [] as any,
 };

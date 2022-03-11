@@ -37,6 +37,10 @@ export type TableEntityId = SchemaEntityId & {
 export type EntityId = DatabaseEntityId &
   Partial<Omit<TableEntityId, "databaseId">>;
 
-export type DataPermission = "data" | "download" | "data-model";
+export type DataPermission =
+  | "data"
+  | "download"
+  | "data-model"
+  | "manage-databases";
 
 export type PermissionSubject = "schemas" | "tables" | "fields";
