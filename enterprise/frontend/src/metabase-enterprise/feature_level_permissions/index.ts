@@ -3,7 +3,7 @@ import { t } from "ttag";
 import { hasPremiumFeature } from "metabase-enterprise/settings";
 import { PLUGIN_FEATURE_LEVEL_PERMISSIONS } from "metabase/plugins";
 
-import { getFeatureLevelDataPermissions } from "./permissions";
+import { getFeatureLevelDataPermissions } from "./permission-management";
 import { DATA_COLUMNS } from "./constants";
 
 if (hasPremiumFeature("advanced_permissions")) {
