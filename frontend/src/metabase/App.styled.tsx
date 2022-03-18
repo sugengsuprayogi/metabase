@@ -14,7 +14,7 @@ export const AppContentContainer = styled.div<{ isAdminApp: boolean }>`
   ${props => !props.isAdminApp && coreAppCss}
 `;
 
-export const AppContent = styled.div`
+export const AppContent = styled.main`
   display: flex;
   flex-direction: column;
   width: 100%;
