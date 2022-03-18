@@ -4,7 +4,7 @@ import {
   DatabaseEntityId,
   PermissionSubject,
 } from "metabase/admin/permissions/types";
-import { GroupsPermissions, User } from "metabase-types/api";
+import { GroupsPermissions, User, Dataset } from "metabase-types/api";
 
 // Plugin integration points. All exports must be objects or arrays so they can be mutated by plugins.
 const object = () => ({});
@@ -129,4 +129,6 @@ export const PLUGIN_FEATURE_LEVEL_PERMISSIONS = {
     return [] as any;
   },
   dataColumns: [] as any,
+  getDownloadWidgetMessageOverride: (_result: Dataset): string | null => null,
+  canDownloadResults: (_result: Dataset): boolean => true,
 };
