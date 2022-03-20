@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build Metabase ${{ matrix.edition }}
+    name: Build MB ${{ matrix.edition }}
     runs-on: ubuntu-20.04
     timeout-minutes: 40
     strategy:
@@ -39,7 +39,7 @@ jobs:
 
   check_jar_health:
     runs-on: ubuntu-20.04
-    name: Check if Metabase ${{ matrix.edition }} (with java ${{ matrix.java-version }}) is healthy
+    name: Is ${{ matrix.edition }} (java ${{ matrix.java-version }}) healthy?
     needs: build
     timeout-minutes: 10
     strategy:
@@ -64,7 +64,7 @@ jobs:
 
   containerize_test_and_push_container:
     runs-on: ubuntu-20.04
-    name: Containerize Metabase ${{ matrix.edition }}
+    name: Containerize ${{ matrix.edition }}
     needs: check_jar_health
     strategy:
       matrix:
