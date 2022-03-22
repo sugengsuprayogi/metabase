@@ -31,8 +31,6 @@ describeEE("scenarios > admin > permissions", () => {
 
     modifyPermission("All Users", DATA_ACCESS_PERMISSION_INDEX, "Unrestricted");
 
-    modifyPermission("All Users", DOWNLOAD_PERMISSION_INDEX, "1 million rows");
-
     cy.button("Save changes").click();
 
     modal().within(() => {
@@ -69,8 +67,6 @@ describeEE("scenarios > admin > permissions", () => {
       cy.button("Change").click();
     });
 
-    modifyPermission("All Users", DOWNLOAD_PERMISSION_INDEX, "1 million rows");
-
     cy.button("Save changes").click();
 
     modal().within(() => {
@@ -82,18 +78,6 @@ describeEE("scenarios > admin > permissions", () => {
     assertPermissionTable([
       ["Administrators", "Unrestricted", "Yes", "1 million rows"],
       ["All Users", "Unrestricted", "No", "1 million rows"],
-      ["collection", "No self-service", "No", "No"],
-      ["data", "Unrestricted", "Yes", "No"],
-      ["nosql", "Unrestricted", "No", "No"],
-      ["readonly", "No self-service", "No", "No"],
-    ]);
-
-    // Shows granular download permission on the database level
-    cy.visit("/admin/permissions/data/database/1");
-
-    assertPermissionTable([
-      ["Administrators", "Unrestricted", "Yes", "1 million rows"],
-      ["All Users", "Granular", "No", "Granular"],
       ["collection", "No self-service", "No", "No"],
       ["data", "Unrestricted", "Yes", "No"],
       ["nosql", "Unrestricted", "No", "No"],
@@ -117,18 +101,15 @@ describeEE("scenarios > admin > permissions", () => {
 
     assertPermissionTable([
       ["Administrators", "Unrestricted", "Yes", "1 million rows"],
-      ["All Users", "No self-service", "No", "No"],
+      ["All Users", "No self-service", "No", "1 million rows"],
       ["collection", "No self-service", "No", "No"],
       ["data", "Unrestricted", "Yes", "1 million rows"],
       ["nosql", "Unrestricted", "No", "No"],
       ["readonly", "No self-service", "No", "No"],
     ]);
 
-    modifyPermission(
-      groupName,
-      DATA_ACCESS_PERMISSION_INDEX,
-      "No self-service",
-    );
+    modifyPermission(groupName, DATA_ACCESS_PERMISSION_INDEX, "Block");
+    cy.button("Revoke access").click();
 
     cy.button("Save changes").click();
 
@@ -140,27 +121,19 @@ describeEE("scenarios > admin > permissions", () => {
 
     assertPermissionTable([
       ["Administrators", "Unrestricted", "Yes", "1 million rows"],
-      ["All Users", "No self-service", "No", "No"],
+      ["All Users", "No self-service", "No", "1 million rows"],
       ["collection", "No self-service", "No", "No"],
-      ["data", "No self-service", "No", "No"],
+      ["data", "Block", "No", "No"],
       ["nosql", "Unrestricted", "No", "No"],
       ["readonly", "No self-service", "No", "No"],
     ]);
   });
 
-  it.skip("restricts users from downloading questions", () => {
-    cy.signInAsNormalUser();
-    cy.visit("/question/1");
-
-    cy.findByText("Showing first 2,000 rows");
-    cy.icon("download").should("not.exist");
-  });
-
-  it.skip("restricts users from downloading questions", () => {
+  it("restricts users from downloading questions", () => {
     cy.visit("/admin/permissions/data/database/1");
-    const groupName = "data";
 
-    modifyPermission(groupName, DOWNLOAD_PERMISSION_INDEX, "10 thousand rows");
+    // Restrict downloads for All Users
+    modifyPermission("All Users", DOWNLOAD_PERMISSION_INDEX, "No");
 
     cy.button("Save changes").click();
 
@@ -173,13 +146,44 @@ describeEE("scenarios > admin > permissions", () => {
     cy.signInAsNormalUser();
     cy.visit("/question/1");
 
+    cy.findByText("Showing first 2,000 rows");
+    cy.icon("download").should("not.exist");
+  });
+
+  it("limits users from downloading all results", () => {
+    const questionId = 1;
+    cy.visit("/admin/permissions/data/database/1");
+
+    // Restrict downloads for All Users
+    modifyPermission("All Users", DOWNLOAD_PERMISSION_INDEX, "No");
+
+    // Limit downloads for "data" group
+    const groupName = "data";
+    modifyPermission(groupName, DOWNLOAD_PERMISSION_INDEX, "10 thousand rows");
+
+    cy.button("Save changes").click();
+
+    modal().within(() => {
+      cy.findByText("Save permissions?");
+      cy.findByText("Are you sure you want to do this?");
+      cy.button("Yes").click();
+    });
+
+    cy.signInAsNormalUser();
+    cy.visit(`/question/${questionId}`);
+
     cy.icon("download").click();
 
-    downloadAndAssert({ fileType: "xlsx" }, assertion);
+    downloadAndAssert(
+      { fileType: "xlsx", questionId },
+      getRowsCountAssertion(10000),
+    );
   });
 });
 
-function assertion(sheet) {
-  const range = xlsx.utils.decode_range(sheet["!ref"]);
-  expect(range.e.r).to.eq(10001);
+function getRowsCountAssertion(expectedCount) {
+  return sheet => {
+    const range = xlsx.utils.decode_range(sheet["!ref"]);
+    expect(range.e.r).to.eq(expectedCount);
+  };
 }
