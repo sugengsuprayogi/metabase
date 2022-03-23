@@ -46,6 +46,9 @@ import { memoize } from "metabase-lib/lib/utils";
 @ExplicitSize({ selector: ".CardVisualization" })
 @connect()
 export default class Visualization extends React.PureComponent {
+  popoverTimeout = null;
+  previousClicked = null;
+
   constructor(props) {
     super(props);
 
@@ -101,6 +104,15 @@ export default class Visualization extends React.PureComponent {
       !Utils.equals(this.getWarnings(prevProps, prevState), this.getWarnings())
     ) {
       this.updateWarnings();
+    }
+
+    const justClosedPopover =
+      prevState.clicked !== this.state.clicked && this.state.clicked === null;
+    if (justClosedPopover) {
+      clearTimeout(this.popoverTimeout);
+      this.popoverTimeout = setTimeout(() => {
+        this.popoverTimeout = null;
+      }, 500);
     }
   }
 
@@ -268,7 +280,16 @@ export default class Visualization extends React.PureComponent {
     }
 
     // needs to be delayed so we don't clear it when switching from one drill through to another
+    const previousClicked = this.previousClicked;
+    this.previousClicked = clicked;
     setTimeout(() => {
+      const isSameCell =
+        clicked?.column?.id === previousClicked?.column?.id &&
+        clicked?.origin?.rowIndex === previousClicked?.origin?.rowIndex;
+      if (this.popoverTimeout && isSameCell) {
+        return;
+      }
+
       this.setState({ clicked });
     }, 100);
   };
