@@ -130,7 +130,7 @@ export default class App extends Component {
   renderAppBar = () => {
     const { location, onChangeLocation } = this.props;
     return (
-      <AppBar>
+      <AppBar id="mainAppBar">
         <LogoIconWrapper onClick={this.toggleSidebar}>
           <LogoIcon size={24} />
         </LogoIconWrapper>
