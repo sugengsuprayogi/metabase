@@ -67,15 +67,6 @@ export default class Navbar extends Component {
     return this.props.path.startsWith(path);
   }
 
-  renderAdminNav() {
-    return (
-      <>
-        <AdminNavbar {...this.props} />
-        {this.renderModal()}
-      </>
-    );
-  }
-
   renderEmptyNav() {
     return (
       // NOTE: DO NOT REMOVE `Nav` CLASS FOR NOW, USED BY MODALS, FULLSCREEN DASHBOARD, ETC
@@ -92,7 +83,6 @@ export default class Navbar extends Component {
             </Link>
           </li>
         </ul>
-        {this.renderModal()}
       </nav>
     );
   }
@@ -166,7 +156,7 @@ export default class Navbar extends Component {
 
     switch (context) {
       case "admin":
-        return this.renderAdminNav();
+        return <AdminNavbar {...this.props} />;
       case "auth":
         return null;
       case "none":
